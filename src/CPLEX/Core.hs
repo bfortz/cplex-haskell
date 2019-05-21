@@ -1,5 +1,6 @@
 {-# OPTIONS_GHC -Wall #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module CPLEX.Core ( CpxEnv(..)
              , CpxLp
@@ -29,8 +30,6 @@ module CPLEX.Core ( CpxEnv(..)
              , dualopt
              , siftopt
              , hybnetopt
-             , getSolution
-             , getMIPSolution
              , writeprob
                -- * change things
              , changeCoefList
@@ -45,6 +44,7 @@ module CPLEX.Core ( CpxEnv(..)
              , getNumRows
              , getErrorString
              , getStatString
+             , getBaseVars
              -- MIP
              , setIncumbentCallback
              , setCutCallback
@@ -56,6 +56,10 @@ module CPLEX.Core ( CpxEnv(..)
              , getCallbackNodeX
              , addCutFromCallback
              , addSingleMIPStart
+             , getSolution
+             , getMIPSolution
+             , getMipRelGap
+             , getMipBestInteger 
                -- * convenience wrappers
              , withEnv
              , withLp
@@ -79,6 +83,7 @@ import           Control.Applicative
 import           CPLEX.Bindings
 import           CPLEX.Param
 import           Data.Char(ord)
+import           Unsafe.Coerce
 
 newtype CpxEnv = CpxEnv (Ptr CpxEnv')
 newtype CpxLp = CpxLp (Ptr CpxLp')
@@ -333,11 +338,40 @@ getMIPSolution' env@(CpxEnv env') lp@(CpxLp lp') = do
         k -> fmap Left (getErrorString env (CpxRet k))
     k -> fmap Left (getErrorString env (CpxRet k))
 
+
+getMipRelGap :: CpxEnv -> Ptr () -> CInt -> IO Double
+getMipRelGap (CpxEnv env') cbdata wherefrom = do
+  gap_p :: Ptr CDouble <- malloc
+  status <- c_CPXgetcallbackinfo env' cbdata wherefrom 125 (unsafeCoerce gap_p)
+  objVal :: CDouble <- peek gap_p 
+  free gap_p
+  return $ if status == 0 then realToFrac objVal else fromIntegral status
+
+getMipBestInteger :: CpxEnv -> Ptr () -> CInt -> IO Double
+getMipBestInteger (CpxEnv env') cbdata wherefrom = do
+  gap_p :: Ptr CDouble <- malloc
+  status <- c_CPXgetcallbackinfo env' cbdata wherefrom 101 (unsafeCoerce gap_p)
+  objVal :: CDouble <- peek gap_p 
+  free gap_p
+  return $ if status == 0 then realToFrac objVal else fromIntegral status
+
 writeprob :: CpxEnv -> CpxLp -> String -> IO (Maybe String)
 writeprob env@(CpxEnv env') lp@(CpxLp lp') filename = do
   fn <- newCAString filename 
   status <- c_CPXwriteprob env' lp' fn nullPtr
   getErrorStatus env status
+
+getBaseVars :: CpxEnv -> CpxLp -> IO (Maybe (Vector Int))
+getBaseVars env@(CpxEnv env') lp@(CpxLp lp') = do
+  numcols <- getNumCols env lp
+  x <- VSM.new numcols
+  VSM.unsafeWith x $ \x' -> do
+    status <- c_CPXgetbase  env' lp' x' nullPtr
+    case status of
+      0 -> do vec <- VS.freeze x
+              let vec' = VS.map fromIntegral vec
+              return $ Just $ vec'
+      _ -> return Nothing
 
 toCpxError :: CpxEnv -> CInt -> IO (Maybe String)
 toCpxError env 0 = return Nothing

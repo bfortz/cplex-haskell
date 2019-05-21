@@ -87,6 +87,11 @@ data CPX_PARAM = CPX_PARAM_ADVIND
                | CPX_PARAM_CLONELOG
                | CPX_PARAM_MIP_Display
                | CPX_PARAM_MIPCBREDLP
+               | CPX_PARAM_MIPDISPLAY
+               | CPX_PARAM_EPGAP
+               | CPX_PARAM_EPAGAP
+               | CPX_PARAM_INTSOLLIM
+               | CPX_PARAM_NODELIM
                deriving Show
 
 paramToInt :: Num a => CPX_PARAM -> a
@@ -159,6 +164,11 @@ paramToInt CPX_PARAM_SOLUTIONTARGET    = 1131
 paramToInt CPX_PARAM_CLONELOG          = 1132
 paramToInt CPX_PARAM_COVERS            = 2005
 paramToInt CPX_PARAM_MIP_Display       = 2012
+paramToInt CPX_PARAM_EPAGAP            = 2008
+paramToInt CPX_PARAM_EPGAP             = 2009
+paramToInt CPX_PARAM_MIPDISPLAY        = 2012
+paramToInt CPX_PARAM_INTSOLLIM         = 2015
+paramToInt CPX_PARAM_NODELIM           = 2017
 paramToInt CPX_PARAM_MIPCBREDLP        = 2055
 
 data CPX_PROB_TYPE = CPX_PROB_LP

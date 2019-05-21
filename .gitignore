@@ -1,5 +1,8 @@
 dist
+.stack-work
+build
+*.swp
 *.hi
-*.hs
 *.h
 *.o
+

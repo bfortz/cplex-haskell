@@ -29,6 +29,7 @@ module CPLEX.Bindings ( CpxEnv'
                       , c_CPXgetnumrows
                       , c_CPXgetobjval
                       , c_CPXgetx
+                      , c_CPXgetbase
                       , c_CPXgetstat
                       , c_CPXgetslack
                       , c_CPXcopylp
@@ -52,6 +53,8 @@ module CPLEX.Bindings ( CpxEnv'
                       , c_CPXsetincumbentcallbackfunc
                       , c_CPXsetcutcallbackfunc
                       , c_CPXsetlazyconstraintcallbackfunc
+                      -- More MIP
+                      , c_CPXgetmiprelgap
                       -- MIP cuts
                       , c_CPXaddmipstarts 
                       , c_CPXcutcallbackadd
@@ -59,6 +62,7 @@ module CPLEX.Bindings ( CpxEnv'
                       , c_CPXaddlazyconstraints
                       , c_CPXgetcallbacknodex
                       , c_CPXgetcallbacknodelp
+                      , c_CPXgetcallbackinfo 
                       ) where
 
 import           Foreign.C   (CChar (..), CDouble (..), CInt (..))
@@ -225,6 +229,11 @@ foreign import ccall safe "cplex.h CPXwriteprob" c_CPXwriteprob ::
 foreign import ccall safe "cplex.h CPXgetcallbacknodelp" c_CPXgetcallbacknodelp ::
     Ptr CpxEnv' -> Ptr () -> CInt -> Ptr (Ptr CpxLp') -> IO CInt
 
+--int CPXXgetcallbackinfo( CPXCENVptr env, void * cbdata, int wherefrom, int
+--whichinfo, void * result_p )
+foreign import ccall safe "cplex.h CPXgetcallbackinfo" c_CPXgetcallbackinfo ::
+    Ptr CpxEnv' -> Ptr () -> CInt -> CInt -> Ptr () -> IO CInt
+
 --int CPXgetcallbacknodex(CPXCENVptr env, void * cbdata, int wherefrom, double * x, int begin, int end)
 foreign import ccall safe "cplex.h CPXgetcallbacknodex" c_CPXgetcallbacknodex ::
     Ptr CpxEnv' -> Ptr () -> CInt -> Ptr CDouble -> CInt -> CInt -> IO CInt
@@ -300,4 +309,8 @@ foreign import ccall "wrapper"
     c_createCutCallbackPtr :: CCutCallback -> IO (FunPtr (CCutCallback))
 --int CPXsetincumbentcallbackfunc(CPXENVptr env, int(*)(CALLBACK_INCUMBENT_ARGS) incumbentcallback, void * cbhandle)
 
+foreign import ccall safe "cplex.h CPXgetmiprelgap" c_CPXgetmiprelgap ::
+    Ptr CpxEnv' -> Ptr CpxLp' -> Ptr CDouble -> IO CInt 
 
+foreign import ccall safe "cplex.h CPXgetbase" c_CPXgetbase ::
+    Ptr CpxEnv' -> Ptr CpxLp' -> Ptr CInt -> Ptr CInt -> IO CInt 
