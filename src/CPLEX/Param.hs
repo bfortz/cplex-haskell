@@ -23,6 +23,7 @@ data CPX_PARAM = CPX_PARAM_ADVIND
                | CPX_PARAM_BASINTERVAL
                | CPX_PARAM_CFILEMUL
                | CPX_PARAM_CLOCKTYPE
+               | CPX_PARAM_COVERS
                | CPX_PARAM_CRAIND
                | CPX_PARAM_DEPIND
                | CPX_PARAM_DPRIIND
@@ -84,6 +85,7 @@ data CPX_PARAM = CPX_PARAM_ADVIND
                | CPX_PARAM_APIENCODING
                | CPX_PARAM_SOLUTIONTARGET
                | CPX_PARAM_CLONELOG
+               | CPX_PARAM_MIP_Display
                | CPX_PARAM_MIPCBREDLP
                deriving Show
 
@@ -155,6 +157,8 @@ paramToInt CPX_PARAM_FILEENCODING      = 1129
 paramToInt CPX_PARAM_APIENCODING       = 1130
 paramToInt CPX_PARAM_SOLUTIONTARGET    = 1131
 paramToInt CPX_PARAM_CLONELOG          = 1132
+paramToInt CPX_PARAM_COVERS            = 2005
+paramToInt CPX_PARAM_MIP_Display       = 2012
 paramToInt CPX_PARAM_MIPCBREDLP        = 2055
 
 data CPX_PROB_TYPE = CPX_PROB_LP
